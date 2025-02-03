@@ -1,0 +1,23 @@
+# Copyright (c) 2022-2023 OwnTech
+# SPDX-License-Identifier: LGPL-2.1
+
+identifier: spin
+name: OwnTech Spin
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 128
+flash: 512
+supported:
+  - pwm
+  - i2c
+  - spi
+  - gpio
+  - counter
+  - watchdog
+  - adc
+  - dac
+  - dma
+  - can

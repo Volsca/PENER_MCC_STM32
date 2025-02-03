@@ -1,0 +1,38 @@
+# Copyright (c) 2022-2023 OwnTech
+# SPDX-License-Identifier: LGPL-2.1
+
+# Spin default Kconfig configuration
+
+# Configure SOC
+CONFIG_SOC_SERIES_STM32G4X=y
+CONFIG_SOC_STM32G474XX=y
+
+# Enable Clocks
+CONFIG_CLOCK_CONTROL=y
+
+# Enable pin control
+CONFIG_PINCTRL=y
+
+# Enable GPIO
+CONFIG_GPIO=y
+
+# Enable UART
+CONFIG_SERIAL=y
+
+# Enable and configure USB
+CONFIG_USB_DEVICE_STACK=y
+CONFIG_USB_DEVICE_MANUFACTURER="OwnTech"
+CONFIG_USB_DEVICE_PRODUCT="SPIN"
+
+# Enable flash
+CONFIG_FLASH=y
+
+# Console
+CONFIG_CONSOLE=y
+CONFIG_UART_CONSOLE=y
+
+# Enable MPU
+CONFIG_ARM_MPU=y
+
+# Enable HW stack protection
+CONFIG_HW_STACK_PROTECTION=y

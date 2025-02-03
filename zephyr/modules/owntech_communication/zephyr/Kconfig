@@ -1,0 +1,32 @@
+config OWNTECH_COMMUNICATION
+	bool "Enable OwnTech communication module [EXPERIMENTAL]"
+	# OwnTech Communication API in still experimental: disable by default
+	default n
+	help
+		This experimental module provides various ways of communicating
+		(CAN, RS485, analog) for OwnTech Power API.
+		It is an experimental module still not ready for production.
+
+if OWNTECH_COMMUNICATION
+
+	config OWNTECH_COMMUNICATION_ENABLE_ANALOG
+		bool "Enable Analog communication API"
+		default y
+
+	config OWNTECH_COMMUNICATION_ENABLE_CAN
+		bool "Enable CAN bus communication API (Thingset over CAN)"
+		default n
+		select CAN
+		select ISOTP
+		select THINGSET
+		select OWNTECH_DATA_API
+
+	config OWNTECH_COMMUNICATION_ENABLE_RS485
+		bool "Enable RS485 bus communication API"
+		default y
+
+	config OWNTECH_COMMUNICATION_ENABLE_SYNC
+		bool "Enable synchronization API"
+		default y
+
+endif

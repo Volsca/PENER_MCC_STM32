@@ -1,0 +1,22 @@
+config OWNTECH_SPIN_API
+	bool "Enable OwnTech Hardware Configuration module"
+	default y
+	depends on OWNTECH_ADC_DRIVER
+	depends on OWNTECH_DAC_DRIVER
+	depends on OWNTECH_HRTIM_DRIVER
+	depends on OWNTECH_TIMER_DRIVER
+	depends on OWNTECH_COMPARATOR_DRIVER
+	depends on OWNTECH_NGND_DRIVER || !SHIELD_TWIST
+	help
+		The SPIN API is a module that aggregates all the drivers of
+		the STM32G474RE of the Spin board within a single object.
+		This abstracts base drivers by providing an object-based,
+		user-friendly API.
+
+config OWNTECH_GPIO_API
+	bool "Enables the OwnTech GPIO API integrated with the SPIN Board"
+	default y
+	help
+		The GPIO API provides ways to interact with Spin
+		GPIO by referencing them by their name, either
+		by using Spin nexus or STM32-style names.
