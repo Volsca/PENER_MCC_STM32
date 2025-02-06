@@ -35,14 +35,14 @@
 
 //--------------SETUP FUNCTIONS DECLARATION-------------------
 void setup_routine(); // Setups the hardware and software of the system
- 
+
 //--------------LOOP FUNCTIONS DECLARATION--------------------
-void loop_background_task();   // Code to be executed in the background task
-void loop_critical_task();     // Code to be executed in real time in the critical task
+void loop_background_task(); // Code to be executed in the background task
+void loop_critical_task();   // Code to be executed in real time in the critical task
 
 //--------------USER VARIABLES DECLARATIONS-------------------
-
-
+bool pwm_enable = false;
+//float32_t meas_data;
 
 //--------------SETUP FUNCTIONS-------------------------------
 
@@ -55,38 +55,38 @@ void loop_critical_task();     // Code to be executed in real time in the critic
 void setup_routine()
 {
     // Setup the hardware first
-    spin.version.setBoardVersion(TWIST_v_1_1_4);
-    twist.setVersion(shield_TWIST_V1_4);
+    spin.version.setBoardVersion(SPIN_v_1_0);
+    twist.setVersion(shield_TWIST_V1_3);
 
-    // Then declare tasks
+    twist.initAllBuck(VOLTAGE_MODE);
+    //twist.initLegBuck(LEG1, VOLTAGE_MODE);
+    //twist.initLegBoost(LEG2);
+    twist.setAllAdcDecim(1);
+    twist.setAllDeadTime(200, 200);
+    twist.setLegPhaseShift(LEG2, 180);
+    //twist.setAllPhaseShift(180);
+    data.enableTwistDefaultChannels();
+    twist.setAllDutyCycle(0.9);
+    //twist.startAll();
+
+    // ------------------------------ TASKS -------------------------------
     uint32_t background_task_number = task.createBackground(loop_background_task);
-    //task.createCritical(loop_critical_task, 500); // Uncomment if you use the critical task
-
+    task.createCritical(loop_critical_task, 500); // Uncomment if you use the critical task
     // Finally, start tasks
     task.startBackground(background_task_number);
-    //task.startCritical(); // Uncomment if you use the critical task
-
-
-    twist.initLegBuck(LEG1);
-    twist.initLegBoost(LEG2);
-    twist.setAllAdcDecim(1);
-    twist.setAllDeadTime(200,200);
-    data.enableTwistDefaultChannels();
-    twist.setAllDutyCycle(0.5);
-    twist.startAll();
+    task.startCritical(); // Uncomment if you use the critical task
 }
 
 //--------------LOOP FUNCTIONS--------------------------------
 
 /**
  * This is the code loop of the background task
- * It is executed second as defined by it suspend task in its last line.
+ * It is executed every second as defined by its "suspend task" in its last line.
  * You can use it to execute slow code such as state-machines.
  */
 void loop_background_task()
 {
     // Task content
-    printk("Hello World! \n");
     spin.led.toggle();
 
     // Pause between two runs of the task
@@ -97,11 +97,14 @@ void loop_background_task()
  * This is the code loop of the critical task
  * It is executed every 500 micro-seconds defined in the setup_software function.
  * You can use it to execute an ultra-fast code with the highest priority which cannot be interruped.
- * It is from it that you will control your power flow.
  */
 void loop_critical_task()
 {
-
+    if (!pwm_enable)
+    {
+        pwm_enable = true;
+        twist.startAll();
+    }
 }
 
 /**
