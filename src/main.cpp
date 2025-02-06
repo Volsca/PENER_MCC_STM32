@@ -35,7 +35,7 @@
 
 //--------------SETUP FUNCTIONS DECLARATION-------------------
 void setup_routine(); // Setups the hardware and software of the system
-
+ 
 //--------------LOOP FUNCTIONS DECLARATION--------------------
 void loop_background_task();   // Code to be executed in the background task
 void loop_critical_task();     // Code to be executed in real time in the critical task
@@ -55,7 +55,8 @@ void loop_critical_task();     // Code to be executed in real time in the critic
 void setup_routine()
 {
     // Setup the hardware first
-    spin.version.setBoardVersion(TWIST_v_1_1_2);
+    spin.version.setBoardVersion(TWIST_v_1_1_4);
+    twist.setVersion(shield_TWIST_V1_4);
 
     // Then declare tasks
     uint32_t background_task_number = task.createBackground(loop_background_task);
@@ -64,6 +65,15 @@ void setup_routine()
     // Finally, start tasks
     task.startBackground(background_task_number);
     //task.startCritical(); // Uncomment if you use the critical task
+
+
+    twist.initLegBuck(LEG1);
+    twist.initLegBoost(LEG2);
+    twist.setAllAdcDecim(1);
+    twist.setAllDeadTime(200,200);
+    data.enableTwistDefaultChannels();
+    twist.setAllDutyCycle(0.5);
+    twist.startAll();
 }
 
 //--------------LOOP FUNCTIONS--------------------------------
