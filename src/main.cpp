@@ -32,6 +32,7 @@
 #include "TaskAPI.h"
 #include "TwistAPI.h"
 #include "SpinAPI.h"
+#include "CommunicationAPI.h"
 
 //--------------SETUP FUNCTIONS DECLARATION-------------------
 void setup_routine(); // Setups the hardware and software of the system
@@ -41,8 +42,14 @@ void loop_background_task(); // Code to be executed in the background task
 void loop_critical_task();   // Code to be executed in real time in the critical task
 
 //--------------USER VARIABLES DECLARATIONS-------------------
-bool pwm_enable = false;
+bool pwm_enable = false; // Activer la PWM une fois souhaité
 float32_t dutyCycle = 0.1;
+volatile float32_t VI2Low = 0;
+volatile float32_t II2Low = 0;
+volatile float32_t IIHigh = 0;
+volatile float32_t VIHIGH = 0;
+volatile float32_t VI1Low = 0;
+volatile float32_t II1Low = 0;
 //float32_t meas_data;
 
 //--------------SETUP FUNCTIONS-------------------------------
@@ -67,6 +74,14 @@ void setup_routine()
     twist.setAllDutyCycle(dutyCycle); // TODO à déplacer
     twist.setAllTriggerValue(0.5);
 
+    // Activation des broches C0 à C3 & A1 et A0
+    data.enableAcquisition(1, 24); // C0; VI2Low
+    data.enableAcquisition(1, 25); // C1; II2Low
+    data.enableAcquisition(1, 26); // C2; IIHigh
+    data.enableAcquisition(1, 27); // C3, VIHigh
+    data.enableAcquisition(1, 29); // A0; VI1Low
+    data.enableAcquisition(1, 30); // A1; II1Low
+
     // ------------------------------ TASKS -------------------------------
     // à faire à la fin du setup
     uint32_t background_task_number = task.createBackground(loop_background_task);
@@ -86,6 +101,17 @@ void setup_routine()
 void loop_background_task()
 {
     // Task content
+    data.triggerAcquisition(1);
+    VI2Low = data.getLatest(1, 24);
+    II2Low = data.getLatest(1, 25);
+    IIHigh = data.getLatest(1, 26);
+    VIHIGH = data.getLatest(1, 27);
+    VI1Low = data.getLatest(1, 29);
+    II1Low = data.getLatest(1, 30);
+    
+    printk("VI2Low=\%f II2Low=\%f IIHigh=\%f VIHIGH=\%f VI1Low=\%f II1Low=\%f \n"
+        , VI2Low, II2Low, IIHigh, VIHIGH, VI1Low, II1Low);
+
     spin.led.toggle();
 
     // Pause between two runs of the task
@@ -103,9 +129,10 @@ void loop_critical_task()
     {
         pwm_enable = true;
         twist.startAll();
+
     }
-    /* Test du changement de rapport cyclyque (le passage de 0.9 à 0.1 est quelque peu violent)
-    if (dutyCycle <= 0.9)
+    // Test du changement de rapport cyclyque (le passage de 0.9 à 0.1 est quelque peu violent)
+    /*if (dutyCycle <= 0.9)
     {
         dutyCycle = dutyCycle + 0.00001;
     }
@@ -113,14 +140,12 @@ void loop_critical_task()
     if (dutyCycle > 0.9)
     {
         dutyCycle = 0.1;
-    }
-    */
+    }*/
+    
 
     twist.setAllDutyCycle(dutyCycle);
-    data.getLatest();
-
+    
 }
-
 /**
  * Fonction main générique / ne pas modifier
  */

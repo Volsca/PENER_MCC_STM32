@@ -470,8 +470,8 @@ uint8_t DataAPI::getChannelNumber(uint8_t adc_num, uint8_t twist_pin)
 	case 1:
 		switch (twist_pin)
 		{
-			case 1:
-				return 14;
+			case 1: // Numéro de pin
+				return 14; // Nom de la broche (ADC1_IN14) (channel_num)
 				break;
 			case 2:
 				return 11;
