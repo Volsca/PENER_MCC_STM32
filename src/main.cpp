@@ -42,39 +42,38 @@ void loop_critical_task();   // Code to be executed in real time in the critical
 
 //--------------USER VARIABLES DECLARATIONS-------------------
 bool pwm_enable = false;
+float32_t dutyCycle = 0.1;
 //float32_t meas_data;
 
 //--------------SETUP FUNCTIONS-------------------------------
 
 /**
- * This is the setup routine.
+ * Routine de setup, 
  * It is used to call functions that will initialize your spin, twist, data and/or tasks.
- * In this example, we setup the version of the spin board and a background task.
- * The critical task is defined but not started.
  */
 void setup_routine()
 {
-    // Setup the hardware first
+    // Setup du hardware en premier
     spin.version.setBoardVersion(SPIN_v_1_0);
     twist.setVersion(shield_TWIST_V1_3);
 
-    twist.initAllBuck(VOLTAGE_MODE);
-    //twist.initLegBuck(LEG1, VOLTAGE_MODE);
-    //twist.initLegBoost(LEG2);
+    // ----------------------------- User Setup ---------------
+    // Setup du hacheur 4Q
+    twist.initLegBuck(LEG1);
+    twist.initLegBoost(LEG2);
     twist.setAllAdcDecim(1);
     twist.setAllDeadTime(200, 200);
-    twist.setLegPhaseShift(LEG2, 180);
-    //twist.setAllPhaseShift(180);
     data.enableTwistDefaultChannels();
-    twist.setAllDutyCycle(0.9);
-    //twist.startAll();
+    twist.setAllDutyCycle(dutyCycle); // TODO à déplacer
+    twist.setAllTriggerValue(0.5);
 
     // ------------------------------ TASKS -------------------------------
+    // à faire à la fin du setup
     uint32_t background_task_number = task.createBackground(loop_background_task);
-    task.createCritical(loop_critical_task, 500); // Uncomment if you use the critical task
-    // Finally, start tasks
+    task.createCritical(loop_critical_task, 500);
+    // Démarrer les taches
     task.startBackground(background_task_number);
-    task.startCritical(); // Uncomment if you use the critical task
+    task.startCritical();
 }
 
 //--------------LOOP FUNCTIONS--------------------------------
@@ -105,11 +104,25 @@ void loop_critical_task()
         pwm_enable = true;
         twist.startAll();
     }
+    /* Test du changement de rapport cyclyque (le passage de 0.9 à 0.1 est quelque peu violent)
+    if (dutyCycle <= 0.9)
+    {
+        dutyCycle = dutyCycle + 0.00001;
+    }
+
+    if (dutyCycle > 0.9)
+    {
+        dutyCycle = 0.1;
+    }
+    */
+
+    twist.setAllDutyCycle(dutyCycle);
+    data.getLatest();
+
 }
 
 /**
- * This is the main function of this example
- * This function is generic and does not need editing.
+ * Fonction main générique / ne pas modifier
  */
 int main(void)
 {
