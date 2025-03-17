@@ -50,6 +50,7 @@ volatile float32_t IIHigh = 0;
 volatile float32_t VIHIGH = 0;
 volatile float32_t VI1Low = 0;
 volatile float32_t II1Low = 0;
+volatile uint32_t encoderValue = 0;
 //float32_t meas_data;
 
 //--------------SETUP FUNCTIONS-------------------------------
@@ -68,13 +69,17 @@ void setup_routine()
     // Setup du hacheur 4Q
     twist.initLegBuck(LEG1);
     twist.initLegBoost(LEG2);
+
+    // Setup de l'ADC
     twist.setAllAdcDecim(1);
     twist.setAllDeadTime(200, 200);
     data.enableTwistDefaultChannels();
-    twist.setAllDutyCycle(dutyCycle); // TODO à déplacer
     twist.setAllTriggerValue(0.5);
 
-    // Activation des broches C0 à C3 & A1 et A0
+    // Rapport cyclique initiale
+    twist.setAllDutyCycle(dutyCycle); // TODO à déplacer
+
+    // Activation des broches C0 à C3 & A1 et A0 pour les prises de mesure
     data.enableAcquisition(1, 24); // C0; VI2Low
     data.enableAcquisition(1, 25); // C1; II2Low
     data.enableAcquisition(1, 26); // C2; IIHigh
@@ -82,10 +87,14 @@ void setup_routine()
     data.enableAcquisition(1, 29); // A0; VI1Low
     data.enableAcquisition(1, 30); // A1; II1Low
 
-    // ------------------------------ TASKS -------------------------------
-    // à faire à la fin du setup
+    // Setup de l'encodeur
+    spin.timer.startLogTimer4IncrementalEncoder();
+
+    // ------------------------------ TASKS ------------------------------- à faire à la FIN DU SETUP
+    // 
+    // Créer les taches
     uint32_t background_task_number = task.createBackground(loop_background_task);
-    task.createCritical(loop_critical_task, 500);
+    task.createCritical(loop_critical_task, 500); // en micro secondes
     // Démarrer les taches
     task.startBackground(background_task_number);
     task.startCritical();
@@ -100,7 +109,7 @@ void setup_routine()
  */
 void loop_background_task()
 {
-    // Task content
+    // Aquisition et affichage des mesures de Courant/Tension
     data.triggerAcquisition(1);
     VI2Low = data.getLatest(1, 24);
     II2Low = data.getLatest(1, 25);
@@ -108,12 +117,13 @@ void loop_background_task()
     VIHIGH = data.getLatest(1, 27);
     VI1Low = data.getLatest(1, 29);
     II1Low = data.getLatest(1, 30);
-    
     printk("VI2Low=\%f II2Low=\%f IIHigh=\%f VIHIGH=\%f VI1Low=\%f II1Low=\%f \n"
         , VI2Low, II2Low, IIHigh, VIHIGH, VI1Low, II1Low);
 
+    // Récupération et affichage de la valeur de l'encodeur
+    printk("Encodeur=\%d \n", encoderValue);
+    
     spin.led.toggle();
-
     // Pause between two runs of the task
     task.suspendBackgroundMs(1000);
 }
@@ -125,13 +135,15 @@ void loop_background_task()
  */
 void loop_critical_task()
 {
+    // Allumage de la PWM
     if (!pwm_enable)
     {
         pwm_enable = true;
         twist.startAll();
 
     }
-    // Test du changement de rapport cyclyque (le passage de 0.9 à 0.1 est quelque peu violent)
+    
+    // Test de la variation de rapport cyclyque (le passage de 0.9 à 0.1 est quelque peu violent)
     /*if (dutyCycle <= 0.9)
     {
         dutyCycle = dutyCycle + 0.00001;
@@ -141,11 +153,13 @@ void loop_critical_task()
     {
         dutyCycle = 0.1;
     }*/
-    
 
+    encoderValue = spin.timer.getTimer4IncrementalEncoderValue();
+
+    // étape finale de loop_critical_task(), mise à jour du rapport cyclique
     twist.setAllDutyCycle(dutyCycle);
-    
 }
+
 /**
  * Fonction main générique / ne pas modifier
  */

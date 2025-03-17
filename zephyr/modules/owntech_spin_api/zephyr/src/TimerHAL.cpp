@@ -43,7 +43,7 @@ void TimerHAL::timer4Initialize()
 		{
 			.timer_enable_irq = 0,
 			.timer_enable_encoder = 1,
-			.timer_enc_pin_mode = pull_up
+			.timer_enc_pin_mode = pull_down
 
 		};
 		timer_config(timer4, &timer_cfg);
