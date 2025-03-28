@@ -47,7 +47,7 @@ float32_t dutyCycle = 0.1;
 volatile float32_t VI2Low = 0;
 volatile float32_t II2Low = 0;
 volatile float32_t IIHigh = 0;
-volatile float32_t VIHIGH = 0;
+volatile float32_t VIHigh = 0;
 volatile float32_t VI1Low = 0;
 volatile float32_t II1Low = 0;
 volatile uint32_t encoderValue = 0;
@@ -114,14 +114,14 @@ void loop_background_task()
     VI2Low = data.getLatest(1, 24);
     II2Low = data.getLatest(1, 25);
     IIHigh = data.getLatest(1, 26);
-    VIHIGH = data.getLatest(1, 27);
+    VIHigh = data.getLatest(1, 27);
     VI1Low = data.getLatest(1, 29);
     II1Low = data.getLatest(1, 30);
-    printk("VI2Low=\%f II2Low=\%f IIHigh=\%f VIHIGH=\%f VI1Low=\%f II1Low=\%f \n"
-        , VI2Low, II2Low, IIHigh, VIHIGH, VI1Low, II1Low);
+    printk("VI2Low;\%f;II2Low;\%f;IIHigh;\%f;VIHigh;\%f;VI1Low;\%f;II1Low;\%f\n"
+        , VI2Low, II2Low, IIHigh, VIHigh, VI1Low, II1Low);
 
     // Récupération et affichage de la valeur de l'encodeur
-    printk("Encodeur=\%d \n", encoderValue);
+    //printk("Encodeur=\%d \n", encoderValue);
     
     spin.led.toggle();
     // Pause between two runs of the task
