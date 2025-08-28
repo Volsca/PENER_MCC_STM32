@@ -1,3 +1,4 @@
 # Projet PENER
+Repo pour le Projet PENER de l'option E-Control de l'Ecole Centrale de Nantes.
 
-This is the repo for the PENER project, donc by Jacob Wallace & Pauline Presa.
+Jacob Wallace et Pauline Presa
